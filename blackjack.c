@@ -90,7 +90,7 @@ char *string_carta(CARTA car) {
   char scarta[5];
   str = (char *) malloc(sizeof(char)*15);
   traduz_valor(car.valor, scarta);
-  sprintf(str, "%2s%s", scarta, car.naipe);
+  sprintf(str, "%s%s", scarta, car.naipe);
   return str;
 }
 
@@ -140,6 +140,17 @@ void iniciar_mao(JOGADOR *jg, BARALHO *bar) {
   jg->mao[1] = puxaCarta(bar);
   jg->qtd_mao = 2;
 }
+void bemvindo(){
+    printf(" /$$$$$$$  /$$                     /$$          /$$$$$                     /$$                    \n");
+    printf("| $$__  $$| $$                    | $$         |__  $$                    | $$                    \n");
+    printf("| $$  \\ $$| $$  /$$$$$$   /$$$$$$$| $$   /$$      | $$  /$$$$$$   /$$$$$$$| $$   /$$      /$$$$$$$\n");
+    printf("| $$$$$$$ | $$ |____  $$ /$$_____/| $$  /$$/      | $$ |____  $$ /$$_____/| $$  /$$/     /$$_____/\n");
+    printf("| $$__  $$| $$  /$$$$$$$| $$      | $$$$$$/  /$$  | $$  /$$$$$$$| $$      | $$$$$$/     | $$      \n");
+    printf("| $$  \\ $$| $$ /$$__  $$| $$      | $$_  $$ | $$  | $$ /$$__  $$| $$      | $$_  $$     | $$      \n");
+    printf("| $$$$$$$/| $$|  $$$$$$$|  $$$$$$$| $$ \\  $$|  $$$$$$/|  $$$$$$$|  $$$$$$$| $$ \\  $$ /$$|  $$$$$$$\n");
+    printf("|_______/ |__/ \\_______/ \\_______/|__/  \\__/ \\______/  \\_______/ \\_______/|__/  \\__/|__/ \\_______/\n");
+    printf("\n");
+}
 
 int main(void) {
   int i, pts, pts_mesa, aposta, rodada;
@@ -149,14 +160,19 @@ int main(void) {
   system("clear");
 
   /* O jogo inicia com um menu tendo como opções começar o jogo ou sair do programa */
-  printf("Bem-vindo ao Blackjack em C\n\nDigite 1 para comecar o jogo\nDigite qualquer outra tecla para sair\n");
+  bemvindo();
+  printf("Digite 1 para comecar o jogo\n");
+  printf("Digite qualquer outra tecla para sair\n");
   c = getchar();
   while('\n' != getchar()); /* Limpa a entrada */
   system("clear");
   if(c != '1') return 0;
 
-  /* O jogador deve digitar um quantidade de dinheiro coma a qual iniciará o jogo. O programa repete até que um valor válido seja digitado */
+  /* O jogador deve digitar um quantidade de dinheiro coma
+  a qual iniciará o jogo. O programa repete até que um valor
+  válido seja digitado */
   while(1) {
+    bemvindo();
     printf("Digite um montante inicial para você:\n");
     if(!scanf("%d", &jg.dinheiro) || jg.dinheiro <= 0) {
       while('\n' != getchar()); /* Limpa a entrada */
@@ -177,7 +193,8 @@ int main(void) {
        Se o jogador ganhar a rodada ele ganha o dobro da aposta, se perder ele não ganha nada.
        O programa repete até que um valor válido seja digitado. */
     while(1) {
-      printf("Rodada %d\nMontante atual: $%d\nDigite um valor para a aposta dessa rodada:\n", rodada, jg.dinheiro);
+      bemvindo();
+      printf("Rodada %d\nMontante atual: $%d\n\nDigite um valor para a aposta dessa rodada:\n", rodada, jg.dinheiro);
       if(!scanf("%d", &aposta) || aposta > jg.dinheiro || aposta <= 0) {
         while('\n' != getchar()); /* Limpa a entrada */
         system("clear");
@@ -192,29 +209,38 @@ int main(void) {
     iniciar_mao(&jg, &bar);
     iniciar_mao(&mesa, &bar);
 
-    /* O programa repete ate que o jogador deseje abaixar a mao, que a pontuacao seja igual a 21 ou que a pontuacao passe de 21 */
+    /* O programa repete ate que o jogador deseje abaixar a mao,
+    que a pontuacao seja igual a 21 ou que a pontuacao passe de 21 */
     while(1) {
       system("clear");
       /* Mostra a mao do jogador e da mesa. Uma das cartas da mesa fica virada. */
-      printf("Rodada %d\nAposta atual: $%d\n\nMão da mesa:\n ??\n%s\n\nSua mão:\n", rodada, aposta, string_carta(mesa.mao[0]));
+      bemvindo();
+      printf("Rodada %d\nAposta atual: $%d\n\nMão da mesa:\n?? %s\n\nSua mão:\n", rodada, aposta, string_carta(mesa.mao[0]));
       for(i = 0; i < jg.qtd_mao; i++) {
-        printf("%s\n", string_carta(jg.mao[i]));
+        printf("%s ", string_carta(jg.mao[i]));
       }
       pts = pontuaMao(jg.mao, jg.qtd_mao);
-      printf("\nPontuação atual: %d\n", pts);
+      printf("\n\nPontuação atual: %d\n", pts);
 
-      /* Se a pontuacao do jogar for igual a 21 ele automaticamente ganha, se for maior que 21 ele automaticamente perde */
+      /* Se a pontuacao do jogar for igual a 21 ele automaticamente
+      ganha, se for maior que 21 ele automaticamente perde */
       if(pts > 21) {
         printf("\nA pontuação estourou!\nVocê perdeu!\n");
         break;
       }
       else if(pts == 21) {
-        printf("\nA pontuação deu 21!\nVocê ganhou!\n");
+        if (jg.qtd_mao == 2 && (
+                (jg.mao[0].valor == 10 && jg.mao[1].valor == 1) ||
+                (jg.mao[0].valor == 1 && jg.mao[1].valor == 10)
+            )
+        ) printf("\nBlackJack! Você ganhou!");
+        else printf("\nA pontuação deu 21!\nVocê ganhou!\n");
         break;
       }
 
       while(1) {
-        printf("\nDigite 1 para puxar outra carta\nDigite 2 para abaixar a mao\n");
+        printf("\nDigite 1 para puxar outra carta\n");
+        printf("Digite 2 para abaixar a mao\n"); /* TODO mostrar a mão da Mesa no final */
         c = getchar();
         while('\n' != getchar()); /* Limpa a entrada */
         if(c == '1') {
@@ -231,16 +257,24 @@ int main(void) {
     }
 
     while(1) {
-      /* adicionar verificacao para ver se o montante eh 0 */
-      printf("\nMontante resultante:%d\nDeseja jogar outra rodada(s/n):\n", jg.dinheiro);
-      c = getchar();
-      while('\n' != getchar()); /* Limpa a entrada */
+      printf("\nMontante resultante:%d\n", jg.dinheiro);
+      if (jg.dinheiro == 0){
+          printf("Parece que você faliu 😢😢\n Você perdeu!");
+          c = 'n';
+      }
+      else{
+          printf("Deseja jogar outra rodada(s/n):\n");
+          c = getchar();
+          while('\n' != getchar()); /* Limpa a entrada */
+      }
       if(c == 's') {
         rodada++;
         break;
       }
       else if (c == 'n') break;
     }
+    //system("clear");
+    /*TODO printar o resultado final, adicionar um sistema de score*/
     if(c == 'n') break;
   }
   return 0;
