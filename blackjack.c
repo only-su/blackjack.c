@@ -28,7 +28,7 @@ typedef struct _JOGADOR {
 	int	dinheiro;
 } JOGADOR;
 
-/* Traduz o valor inteiro da carta em uma string (A,1,2,3,4,5,6,7,8,9,10,J,Q ou * K) */
+/* Traduz o valor inteiro da carta em uma string (A,1,2,3,4,5,6,7,8,9,10,J,Q ou K) */
 char *traduz_valor(int valor, char *retorno)
 {
 	switch (valor) {
@@ -183,7 +183,8 @@ void titulo()
 
 int main(void)
 {
-	int i, pts, pts_mesa, aposta, rodada;
+	// TODO int pts_mesa;
+	int i, pts, aposta, rodada;
 	char c;
 	BARALHO bar;
 	JOGADOR jg, mesa;
@@ -301,21 +302,21 @@ int main(void)
 						printf("Parece que você faliu 😢😢\n Você perdeu!");
 						c = 'n';
 					} else {
-						printf("Deseja jogar outra rodada(s/n):\n");
+						printf("Digite c para continuar ou s para sair:\n");
 						c = getchar();
 						while ('\n' != getchar())
 							; /* Limpa a entrada */
 					}
-					if (c == 's') {
+					if (c == 'c') {
 						rodada++;
 						break;
-					} else if (c == 'n') {
+					} else if (c == 's') {
 						break;
 					}
 				}
 				// system("clear");
 				/*TODO printar o resultado final, adicionar um sistema de score*/
-				if (c == 'n')
+				if (c == 's')
 					break;
 			}
 		} else if (c == '2') {
@@ -323,8 +324,6 @@ int main(void)
 		} else {
 			break;
 		}
-		if (c == 'n')
-			break;
 	}
 	return 0;
 }
