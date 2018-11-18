@@ -219,6 +219,7 @@ void titulo()
 int main(void)
 {
 	int pts, pts_mesa, aposta, rodada;
+	int seguro = 0;
 	int dft_montante = 200;
 	char c, ident;
 	BARALHO bar;
@@ -241,9 +242,10 @@ int main(void)
 			jg.dinheiro = dft_montante;
 
 			while (1) {
+				ident = 'm';
+				seguro = 0;
 				bar = iniciar_baralho();
 				embaralhar(&bar);
-				ident = 'm';
 				strcpy(msg, "");
 
 				/* O programa pede um valor para ser apostado nessa rodada.
@@ -272,6 +274,8 @@ int main(void)
 				iniciar_mao(&jg, &bar);
 				iniciar_mao(&mesa, &bar);
 
+				mesa.mao[1].valor = 0;
+
 				/* O programa repete ate que o jogador deseje abaixar a mao,
 				 * que a pontuacao seja igual a 21 ou que a pontuacao passe de 21 */
 				while (1) {
@@ -281,6 +285,7 @@ int main(void)
 					printf("Rodada %d\n", rodada);
 					printf("Montante atual: ¢%d\n", jg.dinheiro);
 					printf("Aposta atual: ¢%d\n", aposta);
+					if (seguro > 0) printf("Seguro: ¢%d\n", seguro);
 
 					printf("\nMão da mesa:\n");
 					imprime_mao(&mesa, ident);
@@ -311,25 +316,50 @@ int main(void)
 						ident = 'j';
 					}
 
-					while (ident == 'm') {
-						printf("\nDigite s para finalizar a rodada (stand)\n");
-						printf("%s", (c == 'd') ? "" : "Digite h para pedir mais cartas (hit)\n");
-						printf("%s", (c == 'd' || (aposta) > jg.dinheiro) ? "" : "Digite d para dobrar a aposta (double down)\n");
-						printf("Digite 0 para desistir (surrender)\n");
-						c = getchar();
-						while ('\n' != getchar()); /* Limpa a entrada */
-						if (c == 'h' || c == 'd') {
-							jg.mao[jg.qtd_mao++] = puxaCarta(&bar);
-							if (c == 'd') {
-								jg.dinheiro -= aposta;
-								aposta += aposta;
-								sprintf(msg, "\nVocê dobrou sua aposta! Agora é tudo ou nada!!!\n");
+					if (mesa.mao[1].valor == 0 && mesa.qtd_mao == 2 && seguro == 0) {
+						while (1) {
+							printf("\nO dealer tem um Ás. Deseja fazer seguro? (s/n)");
+							c = getchar();
+							while ('\n' != getchar()); /* Limpa a entrada */
+							if (c == 's') {
+								while (1) {
+									printf("%sDigite um valor para o seguro:\n¢", msg);
+									if (!scanf("%d", &seguro) || seguro > jg.dinheiro || seguro <= 0) {
+										while ('\n' != getchar()); /* Limpa a entrada */
+										sprintf(msg, "Este valor não é válido para ao seguro! ");
+									} else {
+										jg.dinheiro -= seguro;
+										break;
+									}
+								}
+							} else if (c == 'n') {
+								break;
 							}
-							break;
-						} else if (c == 's') {
-							break;
-						} else if (c == '0') {
-							break;
+							strcpy(msg, "");
+							while ('\n' != getchar()); /* Limpa a entrada */
+							if (seguro > 0) break;
+						}
+					} else {
+						while (ident == 'm') {
+							printf("\nDigite s para finalizar a rodada (stand)\n");
+							printf("%s", (c == 'd') ? "" : "Digite h para pedir mais cartas (hit)\n");
+							printf("%s", (c == 'd' || (aposta) > jg.dinheiro) ? "" : "Digite d para dobrar a aposta (double down)\n");
+							printf("Digite 0 para desistir (surrender)\n");
+							c = getchar();
+							while ('\n' != getchar()); /* Limpa a entrada */
+							if (c == 'h' || c == 'd') {
+								jg.mao[jg.qtd_mao++] = puxaCarta(&bar);
+								if (c == 'd') {
+									jg.dinheiro -= aposta;
+									aposta += aposta;
+									sprintf(msg, "\nVocê dobrou sua aposta! Agora é tudo ou nada!!!\n");
+								}
+								break;
+							} else if (c == 's') {
+								break;
+							} else if (c == '0') {
+								break;
+							}
 						}
 					}
 
@@ -344,6 +374,11 @@ int main(void)
 				}
 
 				pts_mesa = pontuaMao(mesa.mao, mesa.qtd_mao);
+
+				if (seguro > 0 && pontuaMao(mesa.mao, 1) == 10) {
+					jg.dinheiro += seguro * 2;
+					printf("Seu seguro rendeu!");
+				}
 
 				if (c == '0') {
 					printf("\nVocê desistiu...");
