@@ -125,10 +125,9 @@ void imprime_mao(JOGADOR *jg, char ident)
 		traduz_valor(jg->mao[i].valor, scarta);
 		sprintf(lines[0], "%s┌─────┐", lines[0]);
 		sprintf(lines[1], "%s│%s    │", lines[1], jg->mao[i].naipe);
-		sprintf(lines[2], "%s│ %c%s%c │", lines[2],
-			(strcmp(scarta, "10")) ? ' ' : scarta[0],
-			(!strcmp(scarta, "10")) ? " " : scarta,
-			(strcmp(scarta, "10")) ? ' ' : scarta[1]);
+		sprintf(lines[2], "%s│  %c%c │", lines[2], scarta[0], (strcmp(scarta, "10")) ? ' ' : scarta[1]);
+		/*(!strcmp(scarta, "10")) ? "" : scarta,
+			(strcmp(scarta, "10")) ? ' ' : scarta[1]);*/
 		sprintf(lines[3], "%s│    %s│", lines[3], jg->mao[i].naipe);
 		sprintf(lines[4], "%s└─────┘", lines[4]);
 	}
@@ -197,20 +196,21 @@ void iniciar_mao(JOGADOR *jg, BARALHO *bar)
 void titulo()
 {
 	system("clear");
+	printf("\n ");
 	printf(" /$$$$$$$  /$$                     /$$          /$$$$$               "
-	       "      /$$                    \n");
+	       "      /$$                    \n ");
 	printf("| $$__  $$| $$                    | $$         |__  $$               "
-	       "     | $$                    \n");
+	       "     | $$                    \n ");
 	printf("| $$  \\ $$| $$  /$$$$$$   /$$$$$$$| $$   /$$      | $$  /$$$$$$   "
-	       "/$$$$$$$| $$   /$$      /$$$$$$$\n");
+	       "/$$$$$$$| $$   /$$      /$$$$$$$\n ");
 	printf("| $$$$$$$ | $$ |____  $$ /$$_____/| $$  /$$/      | $$ |____  $$ "
-	       "/$$_____/| $$  /$$/     /$$_____/\n");
+	       "/$$_____/| $$  /$$/     /$$_____/\n ");
 	printf("| $$__  $$| $$  /$$$$$$$| $$      | $$$$$$/  /$$  | $$  /$$$$$$$| $$ "
-	       "     | $$$$$$/     | $$      \n");
+	       "     | $$$$$$/     | $$      \n ");
 	printf("| $$  \\ $$| $$ /$$__  $$| $$      | $$_  $$ | $$  | $$ /$$__  $$| "
-	       "$$      | $$_  $$     | $$      \n");
+	       "$$      | $$_  $$     | $$      \n ");
 	printf("| $$$$$$$/| $$|  $$$$$$$|  $$$$$$$| $$ \\  $$|  $$$$$$/|  $$$$$$$|  "
-	       "$$$$$$$| $$ \\  $$ /$$|  $$$$$$$\n");
+	       "$$$$$$$| $$ \\  $$ /$$|  $$$$$$$\n ");
 	printf("|_______/ |__/ \\_______/ \\_______/|__/  \\__/ \\______/  "
 	       "\\_______/ \\_______/|__/  \\__/|__/ \\_______/\n");
 	printf("\n");
@@ -218,7 +218,7 @@ void titulo()
 
 int main(void)
 {
-	int pts, pts_mesa, aposta, rodada;
+	int pts, pts_mesa, aposta, rodada, dobrou = 0;
 	int dft_montante = 200;
 	char c, ident;
 	BARALHO bar;
@@ -227,12 +227,13 @@ int main(void)
 	char msg[50];
 	char input[100];
 
-	/* O jogo inicia com um menu tendo como opções começar o jogo ou sair do
-	 * programa */
+	/* O jogo inicia com um menu tendo como opções começar o jogo, configurar
+	 * o jogo ou sair do programa */
 	while (1) {
 		titulo();
 		printf("Digite e para começar o jogo (¢%d)\n", dft_montante);
 		printf("Digite c para configurar\n");
+		printf("Digite i para instruções\n");
 		printf("Digite qualquer outra tecla para sair\n");
 		c = getchar();
 		while ('\n' != getchar());      /* Limpa a entrada */
@@ -251,10 +252,11 @@ int main(void)
 				 * não ganha nada. O programa repete até que um valor válido seja
 				 * digitado. */
 				while (1) {
+					dobrou = 0;
 					titulo();
 					printf("Rodada %d\n", rodada);
 					printf("Montante atual: ¢%d\n", jg.dinheiro);
-					printf("%sDigite um valor para a aposta dessa rodada:\n¢", msg);
+					printf("%s\nDigite um valor para a aposta dessa rodada:\n¢", msg);
 					if (!scanf("%d", &aposta) || aposta > jg.dinheiro || aposta <= 0) {
 						while ('\n' != getchar());      /* Limpa a entrada */
 						sprintf(msg, "Este valor não é válido para a aposta! ");
@@ -302,34 +304,43 @@ int main(void)
 						sprintf(msg, "\nA pontuação estourou!\n");
 						ident = 'j';
 					} else if (pts == 21) {
-						if (jg.qtd_mao == 2 &&
-						    ((jg.mao[0].valor >= 9 && jg.mao[1].valor == 0) ||
-						     (jg.mao[0].valor == 0 && jg.mao[1].valor >= 9)))
+						if (jg.qtd_mao == 2)
 							sprintf(msg, "\nBlackJack! Alguém vai jantar frango essa noite!");
 						else
 							sprintf(msg, "\nA pontuação deu 21!\n");
 						ident = 'j';
 					}
 
-					while (ident == 'm') {
+					if (ident == 'm') {
 						printf("\nDigite s para finalizar a rodada (stand)\n");
-						printf("%s", (c == 'd') ? "" : "Digite h para pedir mais cartas (hit)\n");
-						printf("%s", (c == 'd' || (aposta) > jg.dinheiro) ? "" : "Digite d para dobrar a aposta (double down)\n");
+						printf("%s", (dobrou) ? "" : "Digite h para pedir mais cartas (hit)\n");
+						printf("%s", (dobrou) ? "" : ((aposta > jg.dinheiro) ? "Seu montante é insuficiente para dobrar a aposta!\n" : "Digite d para dobrar a aposta (double down)\n") );
 						printf("Digite 0 para desistir (surrender)\n");
 						c = getchar();
 						while ('\n' != getchar()); /* Limpa a entrada */
-						if (c == 'h' || c == 'd') {
-							jg.mao[jg.qtd_mao++] = puxaCarta(&bar);
+						if(!dobrou){
 							if (c == 'd') {
-								jg.dinheiro -= aposta;
-								aposta += aposta;
-								sprintf(msg, "\nVocê dobrou sua aposta! Agora é tudo ou nada!!!\n");
+								if(aposta <= jg.dinheiro){
+									jg.mao[jg.qtd_mao++] = puxaCarta(&bar);
+									jg.dinheiro -= aposta;
+									aposta += aposta;
+									dobrou = 1;
+									sprintf(msg, "\nVocê dobrou sua aposta! Agora é tudo ou nada!!!\n");
+								}
+								else {
+									sprintf(msg, "\nVocê não tem dinheiro suficiente para dobrar sua aposta!\n");
+									c = 0;
+								}
 							}
-							break;
-						} else if (c == 's') {
-							break;
-						} else if (c == '0') {
-							break;
+							else if(c == 'h') {
+								jg.mao[jg.qtd_mao++] = puxaCarta(&bar);
+							}
+						}
+						else {
+							if(c == 'h' || c == 'd'){
+								sprintf(msg, "\nVocê já dobrou sua aposta! Você não pode puxar mais cartas!\n");
+								c = 0;
+							}
 						}
 					}
 
@@ -341,6 +352,7 @@ int main(void)
 						ident = 'j';
 						titulo();
 					}
+					else if (c != 'h' && c != 'd') continue;
 				}
 
 				pts_mesa = pontuaMao(mesa.mao, mesa.qtd_mao);
@@ -350,26 +362,23 @@ int main(void)
 					jg.dinheiro += aposta / 2;
 				} else if ((pts > pts_mesa && pts <= 21) || pts_mesa > 21) {
 					printf("\nParabéns você ganhou essa rodada!!");
-					jg.dinheiro += (jg.qtd_mao == 2 &&
-							((jg.mao[0].valor >= 9 && jg.mao[1].valor == 0) ||
-							 (jg.mao[0].valor == 0 && jg.mao[1].valor >= 9))) ? (aposta * 2) + (aposta / 2) : aposta * 2;
+					jg.dinheiro += (jg.qtd_mao == 2 && pts == 21) ? (aposta * 2) + (aposta / 2) : aposta * 2;
 				} else if (pts == pts_mesa) {
 					printf("\nEmpate!");
 					jg.dinheiro += aposta;
 				} else {
-					printf("\nQue pena a mesa ganhou dessa vez 😢😢");
+					printf("\nQue pena a mesa ganhou dessa vez 😢 😢");
 				}
 
 				while (1) {
 					printf("\nMontante resultante: ¢%d\n\n", jg.dinheiro);
 					if (jg.dinheiro == 0) {
-						printf("Parece que você faliu 😢😢\n");
+						printf("Parece que você faliu 😢 😢\n");
 						c = 's';
 					} else {
 						printf("Digite c para continuar ou s para sair: ");
 						c = getchar();
-						while ('\n' != getchar())
-							; /* Limpa a entrada */
+						while ('\n' != getchar()); /* Limpa a entrada */
 					}
 					if (c == 'c') {
 						rodada++;
@@ -381,26 +390,35 @@ int main(void)
 				if (c == 's') {
 					printf("Digite qualquer coisa para voltar ao menu principal...");
 					getchar();
+					while('\n' != getchar()); /* Limpa a entrada */
 					break;
 				}
 			}
 		} else if (c == 'c') {
-			/* TODO menu para mudar o montante padrão e a quantidade de jogadores */
+			strcpy(msg, "");
 			/* O jogador deve digitar um quantidade de dinheiro com a
 			 * a qual iniciará o jogo. O programa repete até que um valor
 			 * válido seja digitado */
 			while (1) {
 				titulo();
-				printf("Digite um montante padrão para as partidas:\n");
+				printf("%s\n", msg);
+				printf("Digite um montante padrão para as partidas:\n¢");
 				fgets(input, 100, stdin);
 				if (!sscanf(input, "%d", &dft_montante) || dft_montante <= 0)
-					printf("Este valor não é válido!\n");
+					strcpy(msg, "Este valor não é válido!");
 				else
 					break;
 			}
-		} else {
-			break;
-		}
+		} else if (c == 'i') {
+			titulo();
+			printf("Regras de Blackjack:\n\n");
+			printf("Blackjack (também conhecido como \"21\") é um jogo de cartas que tem como objetivo atingir uma pontuação\nmaior que a da mesa com a qual se está competindo sem ultrapassar 21 pontos.\n");
+			printf("\nCada carta vale uma pontuação diferente:\n\n");
+			printf(" 2-10: Vale o número na carta\nJ-Q-K: Vale 10\n    A: Vale 1 ou 11 (Dependedo do o que beneficia mais o jogador)\n");
+			printf("\nDigite qualquer coisa para voltar ao menu principal...");
+			getchar();
+			while('\n' != getchar()); /* Limpa a entrada */
+		} else break;
 	}
 	return 0;
 }
