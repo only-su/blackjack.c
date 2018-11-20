@@ -234,7 +234,7 @@ int main(void)
 		printf("Digite e para começar o jogo (¢%d)\n", dft_montante);
 		printf("Digite c para configurar\n");
 		printf("Digite i para instruções\n");
-		printf("Digite qualquer outra tecla para sair\n");
+		printf("Digite qualquer outra coisa para sair\n");
 		c = getchar();
 		while ('\n' != getchar());      /* Limpa a entrada */
 		if (c == 'e') {
@@ -374,7 +374,7 @@ int main(void)
 					printf("\nMontante resultante: ¢%d\n\n", jg.dinheiro);
 					if (jg.dinheiro == 0) {
 						printf("Parece que você faliu 😢 😢\n");
-						c = 's';
+						break;
 					} else {
 						printf("Digite c para continuar ou s para sair: ");
 						c = getchar();
@@ -387,12 +387,12 @@ int main(void)
 						break;
 					}
 				}
-				if (c == 's') {
+				if (jg.dinheiro == 0) {
 					printf("Digite qualquer coisa para voltar ao menu principal...");
 					getchar();
 					while('\n' != getchar()); /* Limpa a entrada */
 					break;
-				}
+				} else if(c == 's') break;
 			}
 		} else if (c == 'c') {
 			strcpy(msg, "");
