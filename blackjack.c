@@ -218,12 +218,13 @@ void titulo()
 
 int main(void)
 {
-	int pts, pts_mesa, aposta, rodada, dobrou = 0;
+	int pts, pts_mesa, pts_split, pts_aux, aposta, rodada, dobrou = 0, split = 0, mao_atual, desistiu_split = 0;
 	int dft_montante = 200;
 	char c, ident;
 	BARALHO bar;
 	JOGADOR jg;
 	JOGADOR mesa;
+	JOGADOR jg_split;
 	char msg[50];
 	char input[100];
 
@@ -252,7 +253,10 @@ int main(void)
 				 * não ganha nada. O programa repete até que um valor válido seja
 				 * digitado. */
 				while (1) {
+				  desistiu_split = 0;
+				  split = 0;
 					dobrou = 0;
+					mao_atual = 0;
 					titulo();
 					printf("Rodada %d\n", rodada);
 					printf("Montante atual: ¢%d\n", jg.dinheiro);
@@ -273,7 +277,7 @@ int main(void)
 				/* Inicia a mao do jogador e da mesa */
 				iniciar_mao(&jg, &bar);
 				iniciar_mao(&mesa, &bar);
-
+				
 				/* O programa repete ate que o jogador deseje abaixar a mao,
 				 * que a pontuacao seja igual a 21 ou que a pontuacao passe de 21 */
 				while (1) {
@@ -283,61 +287,137 @@ int main(void)
 					printf("Rodada %d\n", rodada);
 					printf("Montante atual: ¢%d\n", jg.dinheiro);
 					printf("Aposta atual: ¢%d\n", aposta);
-
+					if(split) printf("Aposta do split: ¢%d\n", aposta);
 					printf("\nMão da mesa:\n");
 					imprime_mao(&mesa, ident);
 					pts_mesa = pontuaMao(mesa.mao, mesa.qtd_mao);
 					printf("\n Pontuação atual: %d\n", (ident != 'm') ? pts_mesa : pts_mesa - pontuaMao(mesa.mao, 1));
 
-					printf("\nSua mão:\n");
-					imprime_mao(&jg, 'j');
-					pts = pontuaMao(jg.mao, jg.qtd_mao);
-					printf("\n Pontuação atual: %d\n", pts);
-
+					if (mao_atual == 1) {
+						printf("\nSua mão (2):\n");
+						imprime_mao(&jg_split, 'j');
+						pts_split = pontuaMao(jg_split.mao, jg_split.qtd_mao);
+						printf("\n Pontuação atual: %d\n", pts_split);
+					}
+					else if ( mao_atual == 0 ){
+						printf("\nSua mão");
+						(split) ? printf(" (1):\n") : printf(":\n");
+						imprime_mao(&jg, 'j');
+						pts = pontuaMao(jg.mao, jg.qtd_mao);
+						printf("\n Pontuação atual: %d\n", pts);
+					}
+					else {
+						printf("\nSua mão (1):\n");
+						imprime_mao(&jg, 'j');
+						pts = pontuaMao(jg.mao, jg.qtd_mao);
+						printf("\n Pontuação atual: %d\n", pts);
+						printf("\nSua mão (2):\n");
+						imprime_mao(&jg_split, 'j');
+						pts_split = pontuaMao(jg_split.mao, jg_split.qtd_mao);
+						printf("\n Pontuação atual: %d\n", pts_split);
+					}
 					printf("%s", msg);
 
 					if (ident == 'j') break;
 
-					/* Se a pontuacao do jogar for igual a 21 ele automaticamente
-					 * ganha, se for maior que 21 ele automaticamente perde */
-					if (pts > 21) {
-						sprintf(msg, "\nA pontuação estourou!\n");
-						ident = 'j';
-					} else if (pts == 21) {
+					/* Se a pontuacao do jogar for igual a 21 ele pode ainda empatar com a
+					 * mesa, se for maior que 21 ele automaticamente perde */
+
+					/* Decide se deve usar a pontuação da mão normal ou a pontuação do split */
+					if (mao_atual == 0) pts_aux = pts;
+					else pts_aux = pts_split;
+
+					if (pts_aux > 21) {
+						printf("\nA pontuação estourou!\n");
+						if(mao_atual == 1 || !split) {
+							if (pts <= 21)
+								while (pts_mesa < 17 && c != '0') {
+									mesa.mao[mesa.qtd_mao++] = puxaCarta(&bar);
+									pts_mesa = pontuaMao(mesa.mao, mesa.qtd_mao);
+								}
+							if(split) mao_atual = 2;
+							ident = 'j';
+							printf("Digite qualquer coisa para continuar o jogo...");
+							getchar();
+							while('\n' != getchar());
+						}
+						else {
+							printf("Digite qualquer coisa para jogar com sua 2ª mão...");
+							getchar();
+							while('\n' != getchar());
+							mao_atual = 1;
+							continue;
+						}
+					} else if (pts_aux == 21) {
 						if (jg.qtd_mao == 2)
-							sprintf(msg, "\nBlackJack! Alguém vai jantar frango essa noite!");
+							printf("\nBlackJack! Alguém vai jantar frango essa noite!");
 						else
-							sprintf(msg, "\nA pontuação deu 21!\n");
-						ident = 'j';
+							printf("\nA pontuação deu 21!\n");
+						if(mao_atual == 1 || !split) {
+							while (pts_mesa < 17 && c != '0') {
+								mesa.mao[mesa.qtd_mao++] = puxaCarta(&bar);
+								pts_mesa = pontuaMao(mesa.mao, mesa.qtd_mao);
+							}
+							if(split) mao_atual = 2;
+							ident = 'j';
+							printf("Digite qualquer coisa para continuar o jogo...");
+							getchar();
+							while('\n' != getchar());
+						}
+						else {
+							printf("Digite qualquer coisa para jogar com sua 2ª mão...");
+							getchar();
+							while('\n' != getchar());
+							mao_atual = 1;
+							continue;
+						}
 					}
 
 					if (ident == 'm') {
 						printf("\nDigite s para finalizar a rodada (stand)\n");
 						printf("%s", (dobrou) ? "" : "Digite h para pedir mais cartas (hit)\n");
-						printf("%s", (dobrou) ? "" : ((aposta > jg.dinheiro) ? "Seu montante é insuficiente para dobrar a aposta!\n" : "Digite d para dobrar a aposta (double down)\n") );
+						printf("%s", (dobrou || split) ? "" : ((aposta > jg.dinheiro) ? "Seu montante é insuficiente para dobrar a aposta!\n" : "Digite d para dobrar a aposta (double down)\n") );
+						printf("%s", (!split && jg.qtd_mao == 2 && (jg.mao[0].valor == jg.mao[1].valor || (jg.mao[0].valor >= 9 && jg.mao[1].valor >= 9))) ? "Digite 2 para separar as cartas (split)\n" : "");
 						printf("Digite 0 para desistir (surrender)\n");
 						c = getchar();
 						while ('\n' != getchar()); /* Limpa a entrada */
 						if(!dobrou){
 							if (c == 'd') {
-								if(aposta <= jg.dinheiro){
-									jg.mao[jg.qtd_mao++] = puxaCarta(&bar);
-									jg.dinheiro -= aposta;
-									aposta += aposta;
-									dobrou = 1;
-									sprintf(msg, "\nVocê dobrou sua aposta! Agora é tudo ou nada!!!\n");
+								if(!split){
+									if(aposta <= jg.dinheiro){
+										jg.mao[jg.qtd_mao++] = puxaCarta(&bar);
+										jg.dinheiro -= aposta;
+										aposta += aposta;
+										dobrou = 1;
+										sprintf(msg, "\nVocê dobrou sua aposta! Agora é tudo ou nada!!!\n");
+									}
+									else {
+										sprintf(msg, "\nVocê não tem dinheiro suficiente para dobrar sua aposta!\n");
+										c = 0;
+									}
 								}
 								else {
-									sprintf(msg, "\nVocê não tem dinheiro suficiente para dobrar sua aposta!\n");
+									sprintf(msg, "\nVocê não pode dobrar sua aposta depois de separar suas cartas!\n");
 									c = 0;
 								}
 							}
 							else if(c == 'h') {
-								jg.mao[jg.qtd_mao++] = puxaCarta(&bar);
+								if (mao_atual == 0) jg.mao[jg.qtd_mao++] = puxaCarta(&bar);
+								else jg_split.mao[jg_split.qtd_mao++] = puxaCarta(&bar);
+							}
+							else if(c == '2') {
+								if(!split) {
+									split = 1;
+									jg_split.qtd_mao = 2;
+									jg_split.mao[0] = jg.mao[1];
+									jg.mao[1] = puxaCarta(&bar);
+									jg_split.mao[1] = puxaCarta(&bar);
+									jg.dinheiro -= aposta;
+								}
 							}
 						}
 						else {
-							if(c == 'h' || c == 'd'){
+							if(c == 'h' || c == 'd' || c == '2'){
 								sprintf(msg, "\nVocê já dobrou sua aposta! Você não pode puxar mais cartas!\n");
 								c = 0;
 							}
@@ -345,33 +425,120 @@ int main(void)
 					}
 
 					if (c == 's' || c == '0') {
-						while (pts_mesa < 17 && c != '0') {
-							mesa.mao[mesa.qtd_mao++] = puxaCarta(&bar);
-							pts_mesa = pontuaMao(mesa.mao, mesa.qtd_mao);
+						if(mao_atual == 1 || !split) {
+							while (pts_mesa < 17 && c != '0') {
+								mesa.mao[mesa.qtd_mao++] = puxaCarta(&bar);
+								pts_mesa = pontuaMao(mesa.mao, mesa.qtd_mao);
+							}
+							if(split) mao_atual = 2;
+							ident = 'j';
+							printf("Digite qualquer coisa para continuar o jogo...");
+							getchar();
+							while('\n' != getchar());
 						}
-						ident = 'j';
+						else {
+							if(c == '0') desistiu_split = 1;
+							printf("Digite qualquer coisa para jogar com sua 2ª mão...");
+							getchar();
+							while('\n' != getchar());
+							mao_atual = 1;
+							continue;
+						}
 						titulo();
 					}
-					else if (c != 'h' && c != 'd') continue;
+					/*else if (c != 'h' && c != 'd' && c != '2') continue;*/
 				}
 
 				pts_mesa = pontuaMao(mesa.mao, mesa.qtd_mao);
-
-				if (c == '0') {
-					printf("\nVocê desistiu...");
-					jg.dinheiro += aposta / 2;
-				} else if ((pts > pts_mesa && pts <= 21) || pts_mesa > 21) {
-					printf("\nParabéns você ganhou essa rodada!!");
-					jg.dinheiro += (jg.qtd_mao == 2 && pts == 21) ? (aposta * 2) + (aposta / 2) : aposta * 2;
-				} else if (pts == pts_mesa) {
-					printf("\nEmpate!");
-					jg.dinheiro += aposta;
-				} else {
-					printf("\nQue pena a mesa ganhou dessa vez 😢 😢");
+				if(!split) {
+					if (c == '0') {
+						printf("\nVocê desistiu...");
+						jg.dinheiro += aposta / 2;
+					} else if ((pts > pts_mesa || pts_mesa > 21) && pts <= 21) {
+						printf("\nParabéns você ganhou essa rodada!!");
+						jg.dinheiro += (jg.qtd_mao == 2 && pts == 21) ? (aposta * 2) + (aposta / 2) : aposta * 2;
+					} else if ((pts == pts_mesa) && pts <= 21) {
+						if(pts != 21 || (jg.qtd_mao != 2 && mesa.qtd_mao != 2)) {
+							printf("\nEmpate!");
+							jg.dinheiro += aposta;
+						}
+						else {
+							if (jg.qtd_mao == 2 && mesa.qtd_mao != 2) {
+								printf("\nParabéns você ganhou essa rodada!!");
+								jg.dinheiro += (aposta * 2) + (aposta / 2);
+							}
+							else if (jg.qtd_mao != 2 && mesa.qtd_mao == 2) {
+								printf("\nQue pena a mesa ganhou dessa vez 😢 😢");
+							}
+							else {
+								printf("\nEmpate!");
+								jg.dinheiro += aposta;
+							}
+						}
+					} else {
+						printf("\nQue pena a mesa ganhou dessa vez 😢 😢");
+					}
+				}
+				else {
+					printf("\nMão 1: ");
+					if (c == '0') {
+						printf("Você desistiu...");
+						jg.dinheiro += aposta / 2;
+					} else if ((pts > pts_mesa || pts_mesa > 21) && pts <= 21) {
+						printf("Parabéns você ganhou essa rodada!!");
+						jg.dinheiro += (jg.qtd_mao == 2 && pts == 21) ? (aposta * 2) + (aposta / 2) : aposta * 2;
+					} else if ((pts == pts_mesa) && pts <= 21) {
+						if(pts != 21 || (jg.qtd_mao != 2 && mesa.qtd_mao != 2)) {
+							printf("Empate!");
+							jg.dinheiro += aposta;
+						}
+						else {
+							if (jg.qtd_mao == 2 && mesa.qtd_mao != 2) {
+								printf("Parabéns você ganhou essa rodada!!");
+								jg.dinheiro += (aposta * 2) + (aposta / 2);
+							}
+							else if (jg.qtd_mao != 2 && mesa.qtd_mao == 2) {
+								printf("Que pena a mesa ganhou dessa vez 😢 😢");
+							}
+							else {
+								printf("Empate!");
+								jg.dinheiro += aposta;
+							}
+						}
+					} else {
+						printf("Que pena a mesa ganhou dessa vez 😢 😢");
+					}
+					printf("\nMão 2: ");
+					if (desistiu_split) {
+						printf("Você desistiu...");
+					} else if ((pts_split > pts_mesa || pts_mesa > 21) && pts_split <= 21) {
+						printf("Parabéns você ganhou essa rodada!!");
+						jg.dinheiro += (jg_split.qtd_mao == 2 && pts_split == 21) ? (aposta * 2) + (aposta / 2) : aposta * 2;
+					} else if ((pts_split == pts_mesa) && pts_split <= 21) {
+						if(pts_split != 21 || (jg_split.qtd_mao != 2 && mesa.qtd_mao != 2)) {
+							printf("Empate!");
+							jg.dinheiro += aposta;
+						}
+						else {
+							if (jg_split.qtd_mao == 2 && mesa.qtd_mao != 2) {
+								printf("Parabéns você ganhou essa rodada!!");
+								jg.dinheiro += (aposta * 2) + (aposta / 2);
+							}
+							else if (jg_split.qtd_mao != 2 && mesa.qtd_mao == 2) {
+								printf("Que pena a mesa ganhou dessa vez 😢 😢");
+							}
+							else {
+								printf("Empate!");
+								jg.dinheiro += aposta;
+							}
+						}
+					} else {
+						printf("Que pena a mesa ganhou dessa vez 😢 😢");
+					}
 				}
 
 				while (1) {
-					printf("\nMontante resultante: ¢%d\n\n", jg.dinheiro);
+					printf("\n\nMontante resultante: ¢%d\n\n", jg.dinheiro);
 					if (jg.dinheiro == 0) {
 						printf("Parece que você faliu 😢 😢\n");
 						break;
