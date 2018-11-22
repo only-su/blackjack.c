@@ -276,6 +276,9 @@ int main(void)
 				iniciar_mao(&jg, &bar);
 				iniciar_mao(&mesa, &bar);
 
+				jg.mao[0].valor = 2;
+				jg.mao[1].valor = 2;
+
 				/* O programa repete ate que o jogador deseje abaixar a mao,
 				 * que a pontuacao seja igual a 21 ou que a pontuacao passe de 21 */
 				while (1) {
@@ -373,7 +376,7 @@ int main(void)
 						printf("%s", (dobrou) ? "" : "Digite h para pedir mais cartas (hit)\n");
 						printf("%s", (dobrou || split) ? "" : ((aposta > jg.dinheiro) ? "Seu montante é insuficiente para dobrar a aposta!\n" : "Digite d para dobrar a aposta (double down)\n"));
 						printf("%s", (!split && jg.qtd_mao == 2 && (jg.mao[0].valor == jg.mao[1].valor || (jg.mao[0].valor >= 9 && jg.mao[1].valor >= 9))) ? "Digite 2 para separar as cartas (split)\n" : "");
-						printf("Digite 0 para desistir (surrender)\n");
+						printf("%s", ((jg.qtd_mao == 2 && mao_atual == 0) || (jg_split.qtd_mao == 2 && mao_atual == 1)) ? "Digite 0 para desistir (surrender)\n" : "");
 						c = getchar();
 						while ('\n' != getchar()); /* Limpa a entrada */
 						if (!dobrou) {
@@ -414,7 +417,7 @@ int main(void)
 						}
 					}
 
-					if (c == 's' || c == '0') {
+					if ((c == 's' || (c == '0' && ((jg.qtd_mao == 2 && mao_atual == 0) || (jg_split.qtd_mao == 2 && mao_atual == 1))))) {
 						if (mao_atual == 1 || !split) {
 							while (pts_mesa < 17 && c != '0') {
 								mesa.mao[mesa.qtd_mao++] = puxaCarta(&bar);
