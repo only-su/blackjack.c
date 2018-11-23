@@ -276,9 +276,6 @@ int main(void)
 				iniciar_mao(&jg, &bar);
 				iniciar_mao(&mesa, &bar);
 
-				jg.mao[0].valor = 2;
-				jg.mao[1].valor = 2;
-
 				/* O programa repete ate que o jogador deseje abaixar a mao,
 				 * que a pontuacao seja igual a 21 ou que a pontuacao passe de 21 */
 				while (1) {
@@ -562,11 +559,10 @@ int main(void)
 			}
 		} else if (c == 'i') {
 			titulo();
-			printf("Regras de Blackjack:\n\n");
-			printf("Blackjack (também conhecido como \"21\") é um jogo de cartas que tem como objetivo atingir uma pontuação\nmaior que a da mesa com a qual se está competindo sem ultrapassar 21 pontos.\n");
-			printf("\nCada carta vale uma pontuação diferente:\n\n");
-			printf(" 2-10: Vale o número na carta\nJ-Q-K: Vale 10\n    A: Vale 1 ou 11 (Dependedo do o que beneficia mais o jogador)\n");
+
+
 			printf("\nDigite qualquer coisa para voltar ao menu principal...");
+
 			getch();
 			while ('\n' != getchar()); /* Limpa a entrada */
 		} else {

@@ -1,0 +1,39 @@
+Blackjack (também conhecido como "21") é um jogo de cartas que tem como objetivo atingir uma pontuação
+maior que a da mesa com a qual se está competindo sem ultrapassar 21 pontos.
+
+Cada carta vale uma pontuação diferente:
+	2-10: Vale o número na carta
+	J-Q-K: Vale 10
+	A: Vale 1 ou 11 (Dependedo do o que beneficia mais o jogador)
+
+next
+
+Antes de receber as cartas você deve anunciar sua aposta, o dealer então põe uma carta
+virada pra baixo e outra pra cima e o jogador recebe duas cartas viradas para cima.
+Caso o jogador tenha um total de 21 nas duas primeiras cartas, é um BlackJack e a rodada acaba,
+ele vence automaticamente a não ser que a mesa tenha um BlackJack também.
+Em caso contrário o jogador terá 5 opções:
+	stand - o jogador indica que deseja permanecer com a mão atual e quer finalizar a rodada.
+	hit - o jogador indica que deseja comprar mais uma carta para compor sua mão atual.
+	double down - o jogador indica que deseja dobrar a aposta feita e comprar somente mais uma carta.
+	split - se as duas primeiras cartas são de mesmo valor o jogador pode indicar que quer separá-las
+	em dois jogos independentes, apostando o mesmo valor na segunda mão.
+	surrend - se a mão inicial não for favorável o jogador pode decidir desistir por metade do valor apostado.
+
+Se o jogador passar de 21 pontos a qualquer momento ele "estoura" a rodada acaba e ele perde automaticamente.
+
+next
+
+Depois do jogador terminar sua rodada, se ele não estorou e nem desistiu, é a vez da mesa,
+que vira a carta que estava de cabeça pra baixo e compra mais cartas até ter pontuação maior ou igual a 17.
+Dobrar a aposta, dividir a mão e desistir não são opções válidas para a mesa e a mesa não tem nenhuma outra
+opção quando puxando as cartas, como tem o jogador.
+
+Após a fase do jogador e a fase da mesa de acordo com as regras anteriores, uma de duas coisas vai acontecer:
+	1 - A mesa estoura e o jogador ganha a rodada.
+	2 - A mesa faz uma mão entre 17 e 21. Se o jogador ainda estiver no jogo a vitória é simplesmente
+	uma questão de quem tem a maior pontuação.
+
+Ao final da rodada se o jogador tiver ganho ele recebe o dobro da aposta inicial,
+ou 2,5 vezes no caso de um BlackJack. Se perder ele perde também a aposta feita.
+A rodada então é finalizada e se ainda tiver dinheiro o jogador tem a opção de começar uma nova ou sair.
