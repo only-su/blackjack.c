@@ -219,12 +219,13 @@ int main(void)
 	int pts, pts_mesa, pts_split, pts_aux, aposta, rodada, dobrou = 0, split = 0, mao_atual, desistiu_split = 0;
 	int dft_montante = 200;
 	char c, ident;
+	char msg[50];
+	char input[255];
 	BARALHO bar;
 	JOGADOR jg;
 	JOGADOR mesa;
 	JOGADOR jg_split;
-	char msg[50];
-	char input[100];
+	FILE *inst;
 
 	/* O jogo inicia com um menu tendo como opções começar o jogo, configurar
 	 * o jogo ou sair do programa */
@@ -551,16 +552,20 @@ int main(void)
 				titulo();
 				printf("%s\n", msg);
 				printf("Digite um montante padrão para as partidas:\n¢");
-				fgets(input, 100, stdin);
+				fgets(input, 255, stdin);
 				if (!sscanf(input, "%d", &dft_montante) || dft_montante <= 0)
 					strcpy(msg, "Este valor não é válido!");
 				else
 					break;
 			}
 		} else if (c == 'i') {
+			inst = fopen("inst.txt", "r");
 			titulo();
-
-
+			fgets(input, 255, inst);
+			while(!feof(inst)) {
+				printf("%s", input);
+				fgets(input, 255, inst);
+			}
 			printf("\nDigite qualquer coisa para voltar ao menu principal...");
 
 			getch();
