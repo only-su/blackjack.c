@@ -216,7 +216,7 @@ void titulo()
 
 int main(void)
 {
-	int pts, pts_mesa, pts_split, pts_aux, aposta, rodada, dobrou = 0, split = 0, mao_atual, desistiu_split = 0;
+	int i, pts, pts_mesa, pts_split, pts_aux, aposta, rodada, dobrou = 0, split = 0, mao_atual, desistiu_split = 0;
 	int dft_montante = 200;
 	char c, ident;
 	char msg[50];
@@ -559,12 +559,22 @@ int main(void)
 					break;
 			}
 		} else if (c == 'i') {
+			i = 0;
 			inst = fopen("inst.txt", "r");
 			titulo();
 			fgets(input, 255, inst);
-			while(!feof(inst)) {
+			while (!feof(inst)) {
 				printf("%s", input);
 				fgets(input, 255, inst);
+				if (i == 15) {
+					i = 0;
+					printf("\nDigite qualquer coisa para passar a próxima página...");
+					getch();
+					while ('\n' != getchar()); /* Limpa a entrada */
+					titulo();
+				} else {
+					i++;
+				}
 			}
 			printf("\nDigite qualquer coisa para voltar ao menu principal...");
 
