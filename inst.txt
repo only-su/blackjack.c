@@ -6,8 +6,6 @@ Cada carta vale uma pontuação diferente:
 	J-Q-K: Vale 10
 	A: Vale 1 ou 11 (Dependedo do o que beneficia mais o jogador)
 
-next
-
 Antes de receber as cartas você deve anunciar sua aposta, o dealer então põe uma carta
 virada pra baixo e outra pra cima e o jogador recebe duas cartas viradas para cima.
 Caso o jogador tenha um total de 21 nas duas primeiras cartas, é um BlackJack e a rodada acaba,
@@ -21,8 +19,6 @@ Em caso contrário o jogador terá 5 opções:
 	surrend - se a mão inicial não for favorável o jogador pode decidir desistir por metade do valor apostado.
 
 Se o jogador passar de 21 pontos a qualquer momento ele "estoura" a rodada acaba e ele perde automaticamente.
-
-next
 
 Depois do jogador terminar sua rodada, se ele não estorou e nem desistiu, é a vez da mesa,
 que vira a carta que estava de cabeça pra baixo e compra mais cartas até ter pontuação maior ou igual a 17.
